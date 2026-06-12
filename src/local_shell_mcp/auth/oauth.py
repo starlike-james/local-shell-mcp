@@ -8,7 +8,7 @@ import secrets
 import time
 from dataclasses import dataclass, field
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse, urlunparse
 
 import jwt
 from authlib.oauth2.rfc6749.errors import (
@@ -125,6 +125,31 @@ def resource_url(request: Request | None = None) -> str:
     # Use the MCP endpoint, not just the origin, so access tokens are audience-bound
     # to this server rather than every service on the same host.
     return (public_base_url(request).rstrip("/") + "/mcp").rstrip("/")
+
+
+def protected_resource_metadata_url(request: Request | None = None) -> str:
+    """Return the RFC9728 well-known metadata URL for the canonical resource.
+
+    RFC9728 inserts ``/.well-known/oauth-protected-resource`` between the
+    origin and any resource path. For example, the metadata URL for
+    ``https://example.com/mcp`` is
+    ``https://example.com/.well-known/oauth-protected-resource/mcp``.
+    """
+    parsed = urlparse(resource_url(request))
+    path = parsed.path or ""
+    if path == "/":
+        path = ""
+    metadata_path = "/.well-known/oauth-protected-resource" + path
+    return urlunparse(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            metadata_path,
+            "",
+            parsed.query,
+            "",
+        )
+    )
 
 
 def _normalize_resource(value: str) -> str:

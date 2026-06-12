@@ -171,6 +171,11 @@ def with_oauth_routes(inner_app: Starlette) -> Starlette:
             methods=["GET"],
         ),
         Route(
+            "/.well-known/oauth-protected-resource/{resource_path:path}",
+            oauth_protected_resource,
+            methods=["GET"],
+        ),
+        Route(
             "/.well-known/oauth-authorization-server",
             oauth_server_metadata,
             methods=["GET"],

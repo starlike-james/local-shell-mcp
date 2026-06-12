@@ -59,12 +59,9 @@ def _extract_token(request: Request) -> str | None:
 
 def _bearer_challenge(request: Request, *, error: str | None = None) -> str:
     """Build the OAuth challenge advertised to MCP clients when auth is missing or invalid."""
-    from .oauth import protected_resource_metadata
+    from .oauth import protected_resource_metadata_url
 
-    metadata_url = (
-        protected_resource_metadata(request)["resource"].rstrip("/")
-        + "/.well-known/oauth-protected-resource"
-    )
+    metadata_url = protected_resource_metadata_url(request)
     parts = [f'resource_metadata="{metadata_url}"']
     if error:
         parts.append(f'error="{error}"')
